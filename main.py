@@ -23,3 +23,5 @@ df = pd.DataFrame([record['fields'] for record in record_list], index=[record['f
 # basic streamlit app
 st.title('Recruiting Tool')
 st.dataframe(df)
+
+df = df.drop(columns = ["Index", "Respondant ID", "Submitted at"])
