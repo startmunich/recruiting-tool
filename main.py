@@ -52,11 +52,11 @@ def render_page(row, title, questions):
     for question in questions:
         st.write(question)
         st.write(row[question])
-        st.markdown("""---""")
+        st.divider()
 
     st.header("Ranking")
     st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
-    st.text_area("")
+    qualitative_1 = st.text_area("")
 
 
 def main():
