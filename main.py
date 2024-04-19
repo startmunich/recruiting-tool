@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+from numpy import isreal
 import pandas as pd
 from pyairtable import Api
 import streamlit as st
@@ -11,6 +12,8 @@ load_dotenv(override=True)
 AIRTABLE_API_KEY = os.environ['AIRTABLE_API_KEY']
 AIRTABLE_BASE_ID = os.environ['AIRTABLE_BASE_ID']
 AIRTABLE_TABLE_ID = os.environ['AIRTABLE_TABLE_ID']
+QUESTION_START = 10
+QUESTION_NUMBER = 3
 
 # load records from airtable using pyairtable
 api = Api(AIRTABLE_API_KEY)
@@ -21,8 +24,6 @@ record_list = table.all()
 df = pd.DataFrame([record['fields'] for record in record_list],
                   index=[record['fields']['Submission ID'] for record in record_list])
 
-print(df.info())
-
 # drop unnecessary columns
 df = df.drop(columns=["Index", "Respondant ID", "Submitted at"])
 
@@ -30,10 +31,6 @@ df = df.drop(columns=["Index", "Respondant ID", "Submitted at"])
 # load css and apply to streamlit
 # css = open('static/css/style.css')
 # st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
-
-def screening_status(row):
-    return "✅" if row['Completed 1'] == 1 else "❌"
-
 
 # basic streamlit app
 def render_page(row, completed):
@@ -49,3 +46,18 @@ titles = [f'{id} {completed}' for id, completed in zip(ids, completed)]
 
 selected_page, completed = st.sidebar.selectbox("Select an application", titles).split(" ")
 render_page(df.loc[selected_page], completed)
+
+questions = df.columns[QUESTION_START:QUESTION_START+QUESTION_NUMBER]
+user_index = 5
+
+st.header("Questions")
+st.markdown("""---""")
+
+for i in range(0, len(questions)):
+    st.write(questions[i])
+    st.write(df[(questions[i])][user_index])
+    st.markdown("""---""")
+
+st.header("Ranking")
+st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
+st.text_area("")
