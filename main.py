@@ -18,7 +18,12 @@ table = api.table(AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID)
 record_list = table.all()
 
 # load data into pandas dataframe
-df = pd.DataFrame([record['fields'] for record in record_list], index=[record['fields']['Submission ID'] for record in record_list])
+df = pd.DataFrame([record['fields'] for record in record_list],
+                  index=[record['fields']['Submission ID'] for record in record_list])
+
+# load css and apply to streamlit
+# css = open('static/css/style.css')
+# st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 # basic streamlit app
 st.title('Recruiting Tool')
