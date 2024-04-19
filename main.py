@@ -1,5 +1,6 @@
 from dotenv import load_dotenv
 import os
+from numpy import isreal
 import pandas as pd
 from pyairtable import Api
 import streamlit as st
@@ -22,6 +23,20 @@ df = pd.DataFrame([record['fields'] for record in record_list], index=[record['f
 
 # basic streamlit app
 st.title('Recruiting Tool')
-st.dataframe(df)
 
 df = df.drop(columns = ["Index", "Respondant ID", "Submitted at"])
+
+questions = df.columns[10:17]
+user_index = 5
+
+st.header("Questions")
+st.markdown("""---""")
+
+for i in range(0, len(questions)):
+    st.write(questions[i])
+    st.write(df[(questions[i])][user_index])
+    st.markdown("""---""")
+
+st.header("Ranking")
+st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
+st.text_area("")
