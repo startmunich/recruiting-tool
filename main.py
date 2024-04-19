@@ -12,7 +12,7 @@ AIRTABLE_API_KEY = os.environ['AIRTABLE_API_KEY']
 AIRTABLE_BASE_ID = os.environ['AIRTABLE_BASE_ID']
 AIRTABLE_TABLE_ID = os.environ['AIRTABLE_TABLE_ID']
 QUESTION_START = 10
-QUESTION_NUMBER = 3
+QUESTION_NUMBER = 7
 
 
 # Get table from airtable using pyairtable
@@ -47,17 +47,20 @@ def render_page(row, title, questions):
     st.title(f'Application: {title}')
 
     st.header("Questions")
-    st.markdown("""---""")
+    st.write("\n")
 
     for question in questions:
-        st.write(question)
+        st.markdown(f"**{question}**")
         st.write(row[question])
         st.divider()
 
     st.header("Ranking")
     st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
     qualitative_1 = st.text_area("")
-
+    if qualitative_1 != "":
+        completed = st.button("Submit")
+        if completed:
+            st.success("Review submitted succesfully!")
 
 def main():
     # Load data
