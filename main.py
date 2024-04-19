@@ -12,6 +12,8 @@ load_dotenv(override=True)
 AIRTABLE_API_KEY = os.environ['AIRTABLE_API_KEY']
 AIRTABLE_BASE_ID = os.environ['AIRTABLE_BASE_ID']
 AIRTABLE_TABLE_ID = os.environ['AIRTABLE_TABLE_ID']
+QUESTION_START = 10
+QUESTION_NUMBER = 3
 
 # load records from airtable using pyairtable
 api = Api(AIRTABLE_API_KEY)
@@ -31,7 +33,7 @@ st.title('Recruiting Tool')
 
 df = df.drop(columns = ["Index", "Respondant ID", "Submitted at"])
 
-questions = df.columns[10:17]
+questions = df.columns[QUESTION_START:QUESTION_START+QUESTION_NUMBER]
 user_index = 5
 
 st.header("Questions")
