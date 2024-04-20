@@ -54,13 +54,21 @@ def render_page(row, title, questions):
         st.write(row[question])
         st.divider()
 
-    st.header("Ranking")
-    st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
-    qualitative_1 = st.text_area("")
-    if qualitative_1 != "":
-        completed = st.button("Submit")
-        if completed:
-            st.success("Review submitted succesfully!")
+    with st.form("Testform"):
+        st.header("Ranking")
+        st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
+        qualitative_1 = st.text_area("")
+        col1, col2 = st.columns(2)
+        with col1:
+            quantitative_1 = st.number_input("Rank this candidate from 1 (bad) to 5 (great)", min_value=1, max_value=5, value=None, step=1)
+        with col2:
+            interview_1 = st.checkbox("Invite to interview")
+        #check if all prior information is right
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            st.success("Review sucessfully submitted!")
+
+
 
 def main():
     # Load data
