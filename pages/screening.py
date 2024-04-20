@@ -12,7 +12,7 @@ AIRTABLE_API_KEY = os.environ['AIRTABLE_API_KEY']
 AIRTABLE_BASE_ID = os.environ['AIRTABLE_BASE_ID']
 AIRTABLE_TABLE_ID = os.environ['AIRTABLE_TABLE_ID']
 QUESTION_START = 10
-QUESTION_NUMBER = 3
+QUESTION_NUMBER = 7
 
 
 # Get table from airtable using pyairtable
@@ -47,16 +47,27 @@ def render_page(row, title, questions):
     st.title(f'Application: {title}')
 
     st.header("Questions")
-    st.markdown("""---""")
+    st.write("\n")
 
     for question in questions:
-        st.write(question)
+        st.markdown(f"**{question}**")
         st.write(row[question])
         st.divider()
 
-    st.header("Ranking")
-    st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
-    qualitative_1 = st.text_area("")
+    with st.form("Testform"):
+        st.header("Ranking")
+        st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
+        qualitative_1 = st.text_area("")
+        col1, col2 = st.columns(2)
+        with col1:
+            quantitative_1 = st.number_input("Rank this candidate from 1 (bad) to 5 (great)", min_value=1, max_value=5, value=None, step=1)
+        with col2:
+            interview_1 = st.checkbox("Invite to interview")
+        #check if all prior information is right
+        submitted = st.form_submit_button("Submit")
+        if submitted:
+            st.success("Review sucessfully submitted!")
+
 
 
 def main():
@@ -71,8 +82,6 @@ def main():
     # Init questions
     questions = df.columns[QUESTION_START:QUESTION_START + QUESTION_NUMBER].tolist()
 
-    st.set_page_config(page_title="Screening", page_icon="🖋️")
-
     # Get selected page and render
     selected_page = st.sidebar.selectbox("Select an application", titles)
     _id = selected_page.split(" ")[0]
@@ -80,4 +89,7 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    if st.session_state["authentication_status"]:
+        main()
+    else:
+        st.stop()
