@@ -11,6 +11,9 @@ from services import database as db
 # Load dotenv file
 load_dotenv(override=True)
 
+# Set page title and icon
+st.set_page_config(page_title="Recruiting SoSe2024", page_icon="🚀")
+
 
 # Load cleaned .data from airtable into pandas dataframe
 def load_dataframe(record_list):
@@ -103,9 +106,6 @@ def apply_css():
 
 
 def main():
-    # Set page title and icon
-    st.set_page_config(page_title="Recruiting SoSe2024", page_icon=":rocket:")
-
     # Check if user is logged in
     status, user = auth.logged_in()
 

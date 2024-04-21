@@ -7,6 +7,8 @@ from services import gsheet as gs
 from timeloop import Timeloop
 from datetime import timedelta
 
+st.set_page_config(page_title="Recruiting SoSe2024", page_icon="🚀")
+
 with open("static/css/style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
@@ -38,8 +40,6 @@ if auth.logged_in()[0]:
 else:
     init()
     # st.markdown("<h1 style='text-align: center; font-weight: bold; margin: 32px;'>Recruiting SoSe2024</h1>", unsafe_allow_html=True)
-
-    st.set_page_config(page_title="Recruiting SoSe2024", page_icon=":rocket:")
 
     with st.form("Credentials"):
         st.text_input("Username", key="username")
