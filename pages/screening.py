@@ -2,6 +2,7 @@ import time
 
 from dotenv import load_dotenv
 import pandas as pd
+from PIL import Image
 import streamlit as st
 from streamlit_extras.add_vertical_space import add_vertical_space
 from streamlit_extras.stylable_container import stylable_container
@@ -12,7 +13,7 @@ from services import database as db
 load_dotenv(override=True)
 
 # Set page title and icon
-st.set_page_config(page_title="Recruiting SoSe2024", page_icon="🚀")
+st.set_page_config(page_title="Recruiting SoSe2024", page_icon=Image.open("static/img/favicon.png"))
 
 
 # Load cleaned .data from airtable into pandas dataframe
