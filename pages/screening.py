@@ -103,6 +103,8 @@ def apply_css():
 
 
 def main():
+    # Set page title and icon
+    st.set_page_config(page_title="Recruiting SoSe2024", page_icon=":rocket:")
 
     # Check if user is logged in
     status, user = auth.logged_in()

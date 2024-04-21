@@ -39,6 +39,8 @@ else:
     init()
     # st.markdown("<h1 style='text-align: center; font-weight: bold; margin: 32px;'>Recruiting SoSe2024</h1>", unsafe_allow_html=True)
 
+    st.set_page_config(page_title="Recruiting SoSe2024", page_icon=":rocket:")
+
     with st.form("Credentials"):
         st.text_input("Username", key="username")
         st.text_input("Password", type="password", key="password")
