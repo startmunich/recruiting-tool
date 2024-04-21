@@ -1,10 +1,6 @@
 import hashlib
-
 import streamlit as st
-from streamlit_cookies_controller import CookieController
 from services import database as db
-
-controller = CookieController()
 
 
 def login(user, password):
@@ -12,20 +8,21 @@ def login(user, password):
     hashed_password = hashlib.sha512((password + salt).encode("utf-8")).hexdigest()
 
     user_result = db.users.getByQuery({"Username": user, "Password": hashed_password})
+    print(f"User result: {user_result}")
+
     if user_result:
         token = hashlib.sha512((user + password + salt).encode("utf-8")).hexdigest()
+        print(f"Set token: {token}")
         db.users.updateByQuery({"Username": user}, {"Token": token})
-        controller.set("token", token)
+        st.session_state["token"] = token
         return True, user_result[0]["Name"]
 
     return False, None
 
 
 def logged_in():
-    cookies = controller.getAll()
-
-    if "token" in cookies:
-        token = cookies["token"]
+    if "token" in st.session_state:
+        token = st.session_state["token"]
 
         user_result = db.users.getByQuery({"Token": token})
         if user_result:
@@ -36,7 +33,6 @@ def logged_in():
 
 def logout():
     st.session_state.clear()
-    controller.remove("token")
 
 
 

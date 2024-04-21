@@ -6,5 +6,5 @@ textColor="#FFFFFF"
 font="sans serif"
 
 [client]
-toolbarMode = "viewer"
+toolbarMode = "minimal"
 showSidebarNavigation = false
