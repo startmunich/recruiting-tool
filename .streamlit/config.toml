@@ -4,3 +4,7 @@ backgroundColor="#00002C"
 secondaryBackgroundColor="#011152"
 textColor="#FFFFFF"
 font="sans serif"
+
+[client]
+toolbarMode = "viewer"
+showSidebarNavigation = false

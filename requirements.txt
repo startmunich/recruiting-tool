@@ -1,0 +1,8 @@
+gspread==6.1.0
+pandas==2.2.2
+pysondb==1.6.7
+python-dotenv==1.0.1
+streamlit==1.33.0
+streamlit_cookies_controller==0.0.4
+streamlit_extras==0.4.2
+timeloop==1.0.2

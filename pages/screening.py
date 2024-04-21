@@ -1,95 +1,167 @@
+import time
+
 from dotenv import load_dotenv
-import os
 import pandas as pd
-from pyairtable import Api
 import streamlit as st
+from streamlit_extras.add_vertical_space import add_vertical_space
+from streamlit_extras.stylable_container import stylable_container
+from services import authenticator as auth
+from services import database as db
 
 # Load dotenv file
 load_dotenv(override=True)
 
-# Constants
-AIRTABLE_API_KEY = os.environ['AIRTABLE_API_KEY']
-AIRTABLE_BASE_ID = os.environ['AIRTABLE_BASE_ID']
-AIRTABLE_TABLE_ID = os.environ['AIRTABLE_TABLE_ID']
-QUESTION_START = 10
-QUESTION_NUMBER = 7
 
-
-# Get table from airtable using pyairtable
-def get_table():
-    api = Api(AIRTABLE_API_KEY)
-    return api.table(AIRTABLE_BASE_ID, AIRTABLE_TABLE_ID)
-
-
-# Load cleaned data from airtable into pandas dataframe
+# Load cleaned .data from airtable into pandas dataframe
 def load_dataframe(record_list):
     df = pd.DataFrame([record['fields'] for record in record_list],
                       index=[record['fields']['Submission ID'] for record in record_list])
     return df.drop(columns=["Index", "Respondant ID", "Submitted at"])
 
 
-# Load css and apply to streamlit
-# css = open('static/css/style.css')
-# st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
-
-
-# Create page titles from dataframe
-def create_page_titles(df):
-    ids = df['Submission ID'].tolist()
-    completed = ["✅" if completed == 1 else "" for completed in df['Completed 1'].tolist()]
-
-    # title is id and completed as string
-    return [f'{id} {completed}' for id, completed in zip(ids, completed)]
-
-
 # Render page
-def render_page(row, title, questions):
-    st.title(f'Application: {title}')
+def render_page(submission_id, screener_nr, completed, evaluation, application, questions):
+    with st.container(border=True):
+        # A suitable emoji for a paper application
+        st.title(f'{"✅" if completed else "📄"} Application {submission_id}')
+        st.markdown("""
+            <style>
+            .answer {
+                font-size: 16px !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
 
-    st.header("Questions")
-    st.write("\n")
+        for i in range(len(questions)):
+            if application[questions[i]]:
+                st.markdown(f"***{questions[i].strip()}***")
 
-    for question in questions:
-        st.markdown(f"**{question}**")
-        st.write(row[question])
-        st.divider()
+                with stylable_container(
+                        key=f"question_{i}",
+                        css_styles="""
+                                    {
+                                        background-color: #011152;
+                                        border-radius: 4px;
+                                        padding: 16px;
+                                    }
+                                """
+                ):
+                    with st.container():
+                        st.markdown(f'<p class="answer">{application[questions[i]]}</p>', unsafe_allow_html=True)
 
-    with st.form("Testform"):
-        st.header("Ranking")
-        st.write("Please give us a qualitative ranking based on the presented information about this candidate.")
-        qualitative_1 = st.text_area("")
-        col1, col2 = st.columns(2)
-        with col1:
-            quantitative_1 = st.number_input("Rank this candidate from 1 (bad) to 5 (great)", min_value=1, max_value=5, value=None, step=1)
-        with col2:
-            interview_1 = st.checkbox("Invite to interview")
-        #check if all prior information is right
+                add_vertical_space(2)
+
+    with st.form("Evaluation Form"):
+        st.header("Evaluation")
+
+        qualitative_value = evaluation[f"Evaluation {screener_nr} - Qualitative"]
+        quantitative_value = evaluation[f"Evaluation {screener_nr} - Quantitative"]
+        quantitative_int = int(quantitative_value) if quantitative_value else None
+
+        interview_options = ["<select>", "Yes 👍", "No 👎"]
+        interview_value = evaluation[f"Evaluation {screener_nr} - Interview"]
+        interview_index = interview_options.index(interview_value) if interview_value in interview_options else 0
+
+        notes_value = evaluation[f"Evaluation {screener_nr} - Additional Notes"]
+        complete_value = evaluation[f"Evaluation {screener_nr} - Complete"]
+        complete_bool = complete_value == "TRUE" if complete_value else False
+
+        qualitative = st.text_area(
+            "Please give us a qualitative ranking based on the presented information about this candidate.",
+            value=qualitative_value)
+        quantitative = st.number_input("Rank this candidate from 1 (bad) to 5 (great)", min_value=1, max_value=5,
+                                       value=quantitative_int, step=1)
+        interview = st.selectbox("Would you like to interview this candidate?", interview_options,
+                                 index=interview_index)
+        notes = st.text_area("Here you can add any additional notes or comments.", value=notes_value)
+        complete = st.checkbox("Mark as complete", value=complete_bool)
+
+        # Check if all prior information is right
         submitted = st.form_submit_button("Submit")
         if submitted:
-            st.success("Review sucessfully submitted!")
+            if complete and not qualitative:
+                st.error("Please provide a qualitative evaluation.")
+            elif complete and not quantitative:
+                st.error("Please provide a qualitative evaluation.")
+            elif complete and not quantitative:
+                st.error("Please provide a quantitative evaluation.")
+            elif complete and (not interview or interview == "<select>"):
+                st.error("Please provide an interview decision.")
 
+            elif db.update_evaluation(screener_nr, submission_id, qualitative, quantitative, interview, notes, complete):
+                st.success("Evaluation submitted successfully!")
+                time.sleep(1)
+                st.rerun()
+            else:
+                st.error("Error submitting evaluation. Please try again.")
+
+
+# Load css and apply to streamlit
+def apply_css():
+    css = open("static/css/style.css")
+    st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 
 def main():
-    # Load data
-    table = get_table()
-    record_list = table.all()
-    df = load_dataframe(record_list)
 
-    # Init page titles
-    titles = create_page_titles(df)
+    # Check if user is logged in
+    status, user = auth.logged_in()
 
-    # Init questions
-    questions = df.columns[QUESTION_START:QUESTION_START + QUESTION_NUMBER].tolist()
+    if not status:
+        st.switch_page("main.py")
 
-    # Get selected page and render
-    selected_page = st.sidebar.selectbox("Select an application", titles)
-    _id = selected_page.split(" ")[0]
-    render_page(df.loc[_id], selected_page, questions)
+    else:
+        questions = db.load_question()
+        submissions, n_completed = db.load_submission_id_for_user(user)
+
+        apply_css()
+
+        # Sidebar texts
+        st.sidebar.title(f"Hey, {user}! 👋")
+        st.sidebar.markdown(f"You have {len(submissions) - n_completed} applications left to review. Let's go!")
+        st.sidebar.divider()
+
+        # Create submission titles
+        submission_titles = [f"{submission_id} - {'✅' if completed else '📄'}" for submission_id, (screener, completed)
+                             in submissions.items()]
+
+        # Get preselected submission from st.session_state
+        submission_ids = list(submissions.keys())
+        preselected_submission_index = submission_ids.index(
+            st.session_state["selected_submission"]) if "selected_submission" in st.session_state else 0
+
+        # Select submission
+        selected_submission_title = st.sidebar.selectbox("Select an application:", submission_titles,
+                                                         index=preselected_submission_index)
+
+        st.sidebar.button("Logout", on_click=auth.logout)
+
+        if not selected_submission_title:
+            st.subheader("You weren't assigned any applications yet.")
+            st.text("Please try again later.")
+
+        else:
+            selected_submission_id = selected_submission_title.split("-")[0].strip()
+            st.session_state["selected_submission"] = selected_submission_id
+
+            evaluation_result = db.evaluations.getByQuery({"Submission ID": selected_submission_id})
+            application_result = db.applications.getByQuery({"Submission ID": selected_submission_id})
+
+            if evaluation_result and application_result:
+                evaluation = evaluation_result[0]
+                application = application_result[0]
+                render_page(
+                    submission_id=selected_submission_id,
+                    screener_nr=submissions[selected_submission_id][0],
+                    completed=submissions[selected_submission_id][1],
+                    evaluation=evaluation,
+                    application=application,
+                    questions=questions
+                )
+
+            else:
+                st.error("Error loading application. Please try again.")
 
 
 if __name__ == '__main__':
-    if st.session_state["authentication_status"]:
-        main()
-    else:
-        st.stop()
+    main()
