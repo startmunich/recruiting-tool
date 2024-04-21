@@ -40,7 +40,7 @@ if auth.logged_in()[0]:
     st.switch_page("pages/screening.py")
 else:
     init()
-    st.markdown("<h2 style=' font-weight: bold;'>Recruiting SS24</h2>", unsafe_allow_html=True)
+    # st.markdown("<h2 style=' font-weight: bold;'>Recruiting SS24</h2>", unsafe_allow_html=True)
 
     with st.form("Credentials"):
         st.text_input("Username", key="username")
