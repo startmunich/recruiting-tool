@@ -44,9 +44,8 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
                         key=f"question_{i}",
                         css_styles="""
                                     {
-                                        background-color: #011152;
-                                        border-radius: 4px;
-                                        padding: 16px;
+                                        border-radius: 6px;
+                                        opacity: 0.8;
                                     }
                                 """
                 ):
