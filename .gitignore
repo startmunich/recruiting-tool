@@ -167,3 +167,5 @@ cython_debug/
 /static/
 .data/
 service_account.json
+Dockerfile
+.dockerignore
