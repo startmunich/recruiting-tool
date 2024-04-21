@@ -45,7 +45,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
                         css_styles="""
                                     {
                                         border-radius: 6px;
-                                        opacity: 0.8;
+                                        opacity: 0.78;
                                     }
                                 """
                 ):
