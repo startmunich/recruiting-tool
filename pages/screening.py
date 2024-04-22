@@ -125,9 +125,9 @@ def apply_css():
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
 
 
-def on_select():
-    selected_submission = st.session_state.selected_submission
-    st.session_state["selected_submission"] = selected_submission
+def format_submission_title(submission_id, submissions):
+    completed = submissions[submission_id][1]
+    return f"{submission_id} - {'✅' if completed else '📄'}"
 
 
 def main():
@@ -149,12 +149,15 @@ def main():
         st.sidebar.markdown(f"""<p>You have <span class="colored">{len(submissions) - n_completed}</span> applications left to review. Let's go!</p>""", unsafe_allow_html=True)
         st.sidebar.divider()
 
-        # Create submission titles
-        submission_titles = [f"{submission_id} - {'✅' if completed else '📄'}" for submission_id, (screener, completed)
-                             in submissions.items()]
+        submission_ids = list(submissions.keys())
+        selected_submission_index = submission_ids.index(st.session_state.selected_submission) if "selected_submission" in st.session_state else 0
 
         # Select submission
-        st.sidebar.selectbox("Select an application:", submission_titles, key="selected_submission", on_change=on_select)
+        st.sidebar.selectbox("Select an application:", submission_ids,
+                             key="selected_submission",
+                             index=selected_submission_index,
+                             format_func=lambda x: format_submission_title(x, submissions)
+                             )
 
         st.sidebar.button("Logout", on_click=auth.logout)
 
@@ -163,17 +166,17 @@ def main():
             st.text("Please try again later.")
 
         else:
-            selected_submission_id = st.session_state["selected_submission"].split(" - ")[0].strip()
-            evaluation_result = db.evaluations.getByQuery({"Submission ID": selected_submission_id})
-            application_result = db.applications.getByQuery({"Submission ID": selected_submission_id})
+            selected_submission = st.session_state.selected_submission
+            evaluation_result = db.evaluations.getByQuery({"Submission ID": selected_submission})
+            application_result = db.applications.getByQuery({"Submission ID": selected_submission})
 
             if evaluation_result and application_result:
                 evaluation = evaluation_result[0]
                 application = application_result[0]
                 render_page(
-                    submission_id=selected_submission_id,
-                    screener_nr=submissions[selected_submission_id][0],
-                    completed=submissions[selected_submission_id][1],
+                    submission_id=selected_submission,
+                    screener_nr=submissions[selected_submission][0],
+                    completed=submissions[selected_submission][1],
                     evaluation=evaluation,
                     application=application,
                     questions=questions,
