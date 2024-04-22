@@ -44,7 +44,7 @@ def update_evaluation(screener_nr, submission_id, qualitative, quantitative, int
             "Submission ID": submission_id,
             f"Evaluation {screener_nr} - Qualitative": qualitative,
             f"Evaluation {screener_nr} - Quantitative": quantitative,
-            f"Evaluation {screener_nr} - Interview": "" if interview == "<select>" else interview,
+            f"Evaluation {screener_nr} - Interview": interview,
             f"Evaluation {screener_nr} - Additional Notes": notes,
             f"Evaluation {screener_nr} - Complete": "TRUE" if completed else "FALSE",
         }

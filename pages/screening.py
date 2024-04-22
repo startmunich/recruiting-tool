@@ -57,7 +57,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
         quantitative_value = evaluation[f"Evaluation {screener_nr} - Quantitative"]
         quantitative_int = int(quantitative_value) if quantitative_value else None
 
-        interview_options = ["<select>", "Yes 👍", "No 👎"]
+        interview_options = ["", "Yes 👍", "No 👎"]
         interview_value = evaluation[f"Evaluation {screener_nr} - Interview"]
         interview_index = interview_options.index(interview_value) if interview_value in interview_options else 0
 
@@ -70,7 +70,8 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
             value=qualitative_value, height=160)
         quantitative = st.slider("Rank this candidate on a scale from 1 (Clear No) to 5 (Clear Yes)", min_value=1, max_value=5, step=1, value=quantitative_int)
         interview = st.selectbox("Should we interview this candidate?", interview_options,
-                                 index=interview_index)
+                                 index=interview_index,
+                                 )
         notes = st.text_area("Additional Notes", value=notes_value, height=120)
         complete = st.checkbox("Mark as complete", value=complete_bool)
 
@@ -83,7 +84,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
                 st.error("Please provide a qualitative evaluation.")
             elif complete and not quantitative:
                 st.error("Please provide a quantitative evaluation.")
-            elif complete and (not interview or interview == "<select>"):
+            elif complete and not interview:
                 st.error("Please provide an interview decision.")
 
             elif db.update_evaluation(screener_nr, submission_id, qualitative, quantitative, interview, notes,
