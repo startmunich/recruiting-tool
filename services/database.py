@@ -26,8 +26,9 @@ def load_users_into_db(user_data):
     users.addMany(user_data)
 
 
-def load_questions_into_db(question_data):
-    questions.add({"Questions": question_data})
+def load_questions_into_db(question_data, links_data):
+    questions.add({"Type": "Questions", "values": question_data})
+    questions.add({"Type": "Links", "values": links_data})
 
 
 def clear():
@@ -80,5 +81,9 @@ def load_submission_id_for_user(user):
     return submissions, n_completed
 
 
-def load_question():
-    return questions.getAll()[0]["Questions"]
+def load_questions():
+    return questions.getByQuery({"Type": "Questions"})[0]["values"]
+
+
+def load_links():
+    return questions.getByQuery({"Type": "Links"})[0]["values"]

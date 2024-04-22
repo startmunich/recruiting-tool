@@ -24,10 +24,9 @@ def load_dataframe(record_list):
 
 
 # Render page
-def render_page(submission_id, screener_nr, completed, evaluation, application, questions):
+def render_page(submission_id, screener_nr, completed, evaluation, application, questions, links):
     with st.container(border=True):
-        # A suitable emoji for a paper application
-        st.title(f'{"✅" if completed else "📄"} Application {submission_id}')
+        st.header(f'{"✅" if completed else "📄"} Application {submission_id}')
         st.markdown("""
             <style>
             .answer {
@@ -59,7 +58,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
                 add_vertical_space(2)
 
     with st.form("Evaluation Form"):
-        st.header("Evaluation")
+        st.subheader("Evaluation")
 
         qualitative_value = evaluation[f"Evaluation {screener_nr} - Qualitative"]
         quantitative_value = evaluation[f"Evaluation {screener_nr} - Quantitative"]
@@ -104,6 +103,29 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
                 st.error("Error submitting evaluation. Please try again.")
 
 
+    with st.container(border=True):
+        st.subheader("Further Information")
+        st.write("The following will disclose name, gender and/or university of the candidate.")
+        st.markdown("""
+            <style>
+            .answer {
+                font-size: 16px !important;
+            }
+            </style>
+            """, unsafe_allow_html=True)
+
+        for i in range(len(links)):
+            if application[links[i]]:
+                link = application[links[i]]
+                col1, col2 = st.columns(2)
+
+                with col1:
+                    st.markdown(f"**{links[i].strip()}**")
+
+                with col2:
+                    st.markdown(f"[click to open]({link})")
+
+
 # Load css and apply to streamlit
 def apply_css():
     css = open("static/css/style.css")
@@ -123,7 +145,8 @@ def main():
         st.switch_page("main.py")
 
     else:
-        questions = db.load_question()
+        questions = db.load_questions()
+        links = db.load_links()
         submissions, n_completed = db.load_submission_id_for_user(user)
 
         apply_css()
@@ -160,7 +183,8 @@ def main():
                     completed=submissions[selected_submission_id][1],
                     evaluation=evaluation,
                     application=application,
-                    questions=questions
+                    questions=questions,
+                    links=links
                 )
 
             else:

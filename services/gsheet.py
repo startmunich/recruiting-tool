@@ -32,6 +32,8 @@ QUESTION_COLS = [
     "AA",
 ]
 
+LINK_COLS = ["H", "I", "J"]
+
 # Initialize variables
 gc = None
 sh = None
@@ -40,12 +42,13 @@ evaluations = None
 user_data = None
 row_numbers = None
 questions = None
+links = None
 
 
 # Initialize the google sheet
 def init():
     print("Initializing google sheet")
-    global gc, sh, application_data, evaluations, user_data, row_numbers, questions
+    global gc, sh, application_data, evaluations, user_data, row_numbers, questions, links
 
     with open("service_account.json", "r") as credentials_file:
         gc_credentials = json.load(credentials_file)
@@ -56,6 +59,7 @@ def init():
         user_data = sh.get_worksheet(2)
         row_numbers = {submission_id: i + 2 for i, submission_id in enumerate(application_data.col_values(1)[1:])}
         questions = [application_data.acell(f'{c}1').value for c in QUESTION_COLS]
+        links = [application_data.acell(f'{c}1').value for c in LINK_COLS]
 
 
 # Upload evaluation .data to the google sheet
@@ -100,10 +104,10 @@ def gsheet_to_db():
     db.clear()
 
     # Load .data from google sheet into json db
-    db.load_application_data_into_db(application_data.get_all_records(expected_headers=questions))
+    db.load_application_data_into_db(application_data.get_all_records(expected_headers=questions + links))
     db.load_recruiting_tool_data_into_db(evaluations.get_all_records())
     db.load_users_into_db(user_data.get_all_records())
-    db.load_questions_into_db(questions)
+    db.load_questions_into_db(questions, links)
 
 
 # Function to calculate the right column index for each screener and desired value
