@@ -27,13 +27,6 @@ def load_dataframe(record_list):
 def render_page(submission_id, screener_nr, completed, evaluation, application, questions, links):
     with st.container(border=True):
         st.header(f'{"✅" if completed else "📄"} Application {submission_id}')
-        st.markdown("""
-            <style>
-            .answer {
-                font-size: 16px !important;
-            }
-            </style>
-            """, unsafe_allow_html=True)
 
         for i in range(len(questions)):
             if application[questions[i]]:
@@ -153,7 +146,7 @@ def main():
 
         # Sidebar texts
         st.sidebar.title(f"Hey, {user}! 👋")
-        st.sidebar.markdown(f"You have {len(submissions) - n_completed} applications left to review. Let's go!")
+        st.sidebar.markdown(f"""<p>You have <span class="colored">{len(submissions) - n_completed}</span> applications left to review. Let's go!</p>""", unsafe_allow_html=True)
         st.sidebar.divider()
 
         # Create submission titles

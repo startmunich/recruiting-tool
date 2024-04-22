@@ -1,4 +1,14 @@
-html, body, h1, h2, h3, p, a, input, label, select, div, [class*="css"], [class*="st"]{
-    font-family: 'Avenir Next', sans-serif; !important;
+html, body, h1, h2, h3, p, a, input, label, select, div, [class*="css"], [class*="st"] {
+    font-family: 'Avenir Next', sans-serif !important;
     border-radius: 0 !important;
 }
+
+.answer {
+    font-size: 16px !important;
+}
+
+.colored {
+    color: #CA1551 !important;
+    font-weight: 600 !important;
+}
+
