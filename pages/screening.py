@@ -68,7 +68,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
         qualitative = st.text_area(
             "Qualitative evaluation",
             value=qualitative_value, height=160)
-        quantitative = st.slider("Rank this candidate on a scale from 1 (bad) to 5 (great)", min_value=1, max_value=5, step=1)
+        quantitative = st.slider("Rank this candidate on a scale from 1 (bad) to 5 (great)", min_value=1, max_value=5, step=1, value=quantitative_int)
         interview = st.selectbox("Should we interview this candidate?", interview_options,
                                  index=interview_index)
         notes = st.text_area("Additional Notes", value=notes_value, height=120)
