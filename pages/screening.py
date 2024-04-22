@@ -68,8 +68,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
         qualitative = st.text_area(
             "Qualitative evaluation",
             value=qualitative_value, height=160)
-        quantitative = st.number_input("Rank this candidate on a scale from 1 (bad) to 5 (great)", min_value=1, max_value=5,
-                                       value=quantitative_int, step=1)
+        quantitative = st.slider("Rank this candidate on a scale from 1 (bad) to 5 (great)", min_value=1, max_value=5, step=1)
         interview = st.selectbox("Should we interview this candidate?", interview_options,
                                  index=interview_index)
         notes = st.text_area("Additional Notes", value=notes_value, height=120)
@@ -95,28 +94,28 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
             else:
                 st.error("Error submitting evaluation. Please try again.")
 
+    if completed:
+        with st.container(border=True):
+            st.subheader("Further Information")
+            st.write("The following discloses name, gender and/or university of the candidate.")
+            st.markdown("""
+                <style>
+                .answer {
+                    font-size: 16px !important;
+                }
+                </style>
+                """, unsafe_allow_html=True)
 
-    with st.container(border=True):
-        st.subheader("Further Information")
-        st.write("The following discloses name, gender and/or university of the candidate.")
-        st.markdown("""
-            <style>
-            .answer {
-                font-size: 16px !important;
-            }
-            </style>
-            """, unsafe_allow_html=True)
+            for i in range(len(links)):
+                if application[links[i]]:
+                    link = application[links[i]]
+                    col1, col2 = st.columns(2)
 
-        for i in range(len(links)):
-            if application[links[i]]:
-                link = application[links[i]]
-                col1, col2 = st.columns(2)
+                    with col1:
+                        st.markdown(f"**{links[i].strip()}**")
 
-                with col1:
-                    st.markdown(f"**{links[i].strip()}**")
-
-                with col2:
-                    st.markdown(f"[click to open]({link})")
+                    with col2:
+                        st.markdown(f"[click to open]({link})")
 
 
 # Load css and apply to streamlit
