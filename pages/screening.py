@@ -105,7 +105,7 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
 
     with st.container(border=True):
         st.subheader("Further Information")
-        st.write("The following will disclose name, gender and/or university of the candidate.")
+        st.write("The following discloses name, gender and/or university of the candidate.")
         st.markdown("""
             <style>
             .answer {
