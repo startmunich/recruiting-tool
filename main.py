@@ -8,7 +8,7 @@ from timeloop import Timeloop
 from datetime import timedelta
 from PIL import Image
 
-st.set_page_config(page_title="Recruiting SoSe2024", page_icon=Image.open("static/img/favicon.png"))
+st.set_page_config(page_title="Recruiting Tool", page_icon=Image.open("static/img/favicon.png"))
 
 with open("static/css/style.css") as css:
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)

@@ -13,7 +13,7 @@ from services import database as db
 load_dotenv(override=True)
 
 # Set page title and icon
-st.set_page_config(page_title="Recruiting SoSe2024", page_icon=Image.open("static/img/favicon.png"))
+st.set_page_config(page_title="Recruiting Tool", page_icon=Image.open("static/img/favicon.png"))
 
 
 # Load cleaned .data from airtable into pandas dataframe
@@ -45,6 +45,11 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
                         css_styles="""
                                     {
                                         opacity: 0.78;
+                                        transform: scale(0.98, 0.98);
+                                        -ms-transform: scale(0.98, 0.98); /* IE 9 */
+                                        -webkit-transform: scale(0.98, 0.98); /* Safari and Chrome */
+                                        -o-transform: scale(0.98, 0.98); /* Opera */
+                                        -moz-transform: scale(0.98, 0.98); /* Firefox */
                                     }
                                 """
                 ):
@@ -69,13 +74,13 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
         complete_bool = complete_value == "TRUE" if complete_value else False
 
         qualitative = st.text_area(
-            "Please give us a qualitative ranking based on the presented information about this candidate.",
-            value=qualitative_value)
-        quantitative = st.number_input("Rank this candidate from 1 (bad) to 5 (great)", min_value=1, max_value=5,
+            "Qualitative evaluation",
+            value=qualitative_value, height=160)
+        quantitative = st.number_input("Rank this candidate on a scale from 1 (bad) to 5 (great)", min_value=1, max_value=5,
                                        value=quantitative_int, step=1)
-        interview = st.selectbox("Would you like to interview this candidate?", interview_options,
+        interview = st.selectbox("Should we interview this candidate?", interview_options,
                                  index=interview_index)
-        notes = st.text_area("Here you can add any additional notes or comments.", value=notes_value)
+        notes = st.text_area("Additional Notes", value=notes_value, height=120)
         complete = st.checkbox("Mark as complete", value=complete_bool)
 
         # Check if all prior information is right
@@ -90,7 +95,8 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
             elif complete and (not interview or interview == "<select>"):
                 st.error("Please provide an interview decision.")
 
-            elif db.update_evaluation(screener_nr, submission_id, qualitative, quantitative, interview, notes, complete):
+            elif db.update_evaluation(screener_nr, submission_id, qualitative, quantitative, interview, notes,
+                                      complete):
                 st.success("Evaluation submitted successfully!")
                 time.sleep(1)
                 st.rerun()
@@ -102,6 +108,11 @@ def render_page(submission_id, screener_nr, completed, evaluation, application, 
 def apply_css():
     css = open("static/css/style.css")
     st.markdown(f'<style>{css.read()}</style>', unsafe_allow_html=True)
+
+
+def on_select():
+    selected_submission = st.session_state.selected_submission
+    st.session_state["selected_submission"] = selected_submission
 
 
 def main():
@@ -126,25 +137,17 @@ def main():
         submission_titles = [f"{submission_id} - {'✅' if completed else '📄'}" for submission_id, (screener, completed)
                              in submissions.items()]
 
-        # Get preselected submission from st.session_state
-        submission_ids = list(submissions.keys())
-        preselected_submission_index = submission_ids.index(
-            st.session_state["selected_submission"]) if "selected_submission" in st.session_state else 0
-
         # Select submission
-        selected_submission_title = st.sidebar.selectbox("Select an application:", submission_titles,
-                                                         index=preselected_submission_index)
+        st.sidebar.selectbox("Select an application:", submission_titles, key="selected_submission", on_change=on_select)
 
         st.sidebar.button("Logout", on_click=auth.logout)
 
-        if not selected_submission_title:
+        if not st.session_state["selected_submission"]:
             st.subheader("You weren't assigned any applications yet.")
             st.text("Please try again later.")
 
         else:
-            selected_submission_id = selected_submission_title.split("-")[0].strip()
-            st.session_state["selected_submission"] = selected_submission_id
-
+            selected_submission_id = st.session_state["selected_submission"].split(" - ")[0].strip()
             evaluation_result = db.evaluations.getByQuery({"Submission ID": selected_submission_id})
             application_result = db.applications.getByQuery({"Submission ID": selected_submission_id})
 

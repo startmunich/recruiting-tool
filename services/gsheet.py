@@ -14,8 +14,8 @@ INDEX_INTERVIEW = 5
 INDEX_NOTES = 6
 INDEX_COMPLETED = 7
 
-# Constant for the amount of questions
-N_QUESTIONS = 6
+# Constant for the amount of columns per evaluation
+N_COLS = 6
 
 QUESTION_COLS = [
     "P",
@@ -30,7 +30,6 @@ QUESTION_COLS = [
     "Y",
     "Z",
     "AA",
-    "AB",
 ]
 
 # Initialize variables
@@ -109,7 +108,7 @@ def gsheet_to_db():
 
 # Function to calculate the right column index for each screener and desired value
 def get_column_for_screener_nr(column_index, screener_nr):
-    return column_index + (screener_nr - 1) * N_QUESTIONS
+    return column_index + (screener_nr - 1) * N_COLS
 
 
 # Get the screener number for a user given the evaluation
