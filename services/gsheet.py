@@ -54,9 +54,9 @@ def init():
         gc_credentials = json.load(credentials_file)
         gc = gspread.service_account_from_dict(gc_credentials)
         sh = gc.open("Application Batch Summer 24 🚀")
-        application_data = sh.get_worksheet(0)
-        evaluations = sh.get_worksheet(1)
-        user_data = sh.get_worksheet(2)
+        application_data = sh.worksheet("Data")
+        evaluations = sh.worksheet("Recruiting Tool")
+        user_data = sh.worksheet("Users")
         row_numbers = {submission_id: i + 2 for i, submission_id in enumerate(application_data.col_values(1)[1:])}
         questions = [application_data.acell(f'{c}1').value for c in QUESTION_COLS]
         links = [application_data.acell(f'{c}1').value for c in LINK_COLS]
@@ -104,7 +104,7 @@ def gsheet_to_db():
     db.clear()
 
     # Load .data from google sheet into json db
-    db.load_application_data_into_db(application_data.get_all_records(expected_headers=questions + links))
+    db.load_application_data_into_db(application_data.get_all_records(expected_headers=set(questions + links)))
     db.load_recruiting_tool_data_into_db(evaluations.get_all_records())
     db.load_users_into_db(user_data.get_all_records())
     db.load_questions_into_db(questions, links)
